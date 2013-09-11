@@ -375,7 +375,7 @@ function $StateProvider(   $urlRouterProvider,   $urlMatcherFactory,           $
 
         promises.push($resolve.resolve(injectables, locals, dst.resolve, state).then(function (result) {
           // References to the controller (only instantiated at link time)
-          result.$$controller = view.controller;
+          result.$$controller = isFunction(view.controllerProvider) ? view.controllerProvider($stateParams) : view.controller;
           // Provide access to the state itself for internal use
           result.$$state = state;
           dst[name] = result;

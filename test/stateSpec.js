@@ -1,6 +1,6 @@
 describe('state', function () {
 
-  var locationProvider, templateParams;
+  var locationProvider, templateParams, dynamicControllerName;
 
   beforeEach(module('ui.router', function($locationProvider) {
     locationProvider = $locationProvider;
@@ -58,6 +58,17 @@ describe('state', function () {
           return "/templates/" + params.item + ".html";
         }
       })
+      .state('dynamicController', { 
+        url: "/:pageType",
+        templateUrl : function(params) {
+          return "/templates/AcmePage.html";
+        },
+        controllerProvider : function(params) {
+          dynamicControllerName = params.pageType + "Controller";
+          return dynamicControllerName;
+        }
+      })
+
 
       .state('first', { url: '^/first/subpath' })
       .state('second', { url: '^/second' });
@@ -225,6 +236,14 @@ describe('state', function () {
 
       var err = "Could not resolve '^.Z' from state 'DD'";
       expect(function() { $state.transitionTo("^.Z", null, { relative: $state.$current }); }).toThrow(err);
+    }));
+
+    it('uses the controllerProvider to select a controller name dynamically when available', inject(function ($state, $q, $httpBackend) {
+      $httpBackend.expectGET("/templates/AcmePage.html").respond("200", "some html");
+      $state.transitionTo('dynamicController', { pageType: "AcmePage" });
+      $q.flush(); 
+
+      expect(dynamicControllerName).toEqual("AcmePageController");
     }));
   });
 
